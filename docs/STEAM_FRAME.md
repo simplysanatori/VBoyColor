@@ -1,5 +1,8 @@
 # VBoy Color on the Steam Frame
 
+The Steam Frame support here is astromaddie's
+([yuk27/VBoyColor#15](https://github.com/yuk27/VBoyColor/pull/15)).
+
 The Steam Frame runs SteamOS on ARM64. This fork builds `VBoyColorVR` as a native
 Linux ARM64 app using OpenXR and Vulkan, without a streaming PC, x86 translation
 or Lepton. Beetle VB still emulates the Virtual Boy games. The app shares its
@@ -90,7 +93,7 @@ wasn't packaged), and CI builds Linux on ARM64 too.
 Install Git and Docker, start the Docker engine, then use a POSIX shell:
 
 ```sh
-git clone --recurse-submodules -b steam-frame https://github.com/astromaddie/VBoyColor.git
+git clone --recurse-submodules -b frame https://github.com/simplysanatori/VBoyColor.git
 cd VBoyColor
 DOCKER_DEFAULT_PLATFORM=linux/arm64 ./tools/steam_frame/build-linux-arm64.sh
 ```

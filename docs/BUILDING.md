@@ -16,7 +16,7 @@ OpenXR SDK, FreeType, GLFW) on the first configure. The emulator core is a
 git submodule:
 
 ```
-git clone --recurse-submodules -b steam-frame https://github.com/astromaddie/VBoyColor.git
+git clone --recurse-submodules -b frame https://github.com/simplysanatori/VBoyColor.git
 cd VBoyColor
 # or, in an existing checkout of this branch:
 git submodule update --init --recursive

@@ -2,11 +2,13 @@
 
 <p align="center"><b>Virtual Boy games in color - in 3D on Meta Quest and Steam Frame, on PC, and on Android phones and handhelds.</b></p>
 
-This is my Steam Frame fork of [yuk27/VBoyColor](https://github.com/yuk27/VBoyColor).
-The `steam-frame` branch adds native Linux ARM64 packaging, Frame controller
-bindings and a SteamVR projection-layer path so each eye gets its own Virtual Boy
-picture. It also includes a Steam library installer with artwork. No streaming PC
-or Android compatibility layer is needed on the Frame.
+This is a Steam Frame fork of [yuk27/VBoyColor](https://github.com/yuk27/VBoyColor).
+The `frame` branch brings in astromaddie's Steam Frame support
+([#15](https://github.com/yuk27/VBoyColor/pull/15)) and menu fix
+([#16](https://github.com/yuk27/VBoyColor/pull/16)): native Linux ARM64
+packaging, Frame controller bindings, a SteamVR projection-layer path so each
+eye gets its own Virtual Boy picture, and a Steam library installer with
+artwork. No streaming PC or Android compatibility layer is needed on the Frame.
 
 Start with [the Frame guide](docs/STEAM_FRAME.md) for installation, controls and a
 fresh build. [BUILDING.md](docs/BUILDING.md) covers the other targets. The upstream
