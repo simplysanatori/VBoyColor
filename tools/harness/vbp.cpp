@@ -459,6 +459,21 @@ extern "C"
         std::memcpy(tiles, g_sheets[i].tiles.data(), g_sheets[i].tiles.size() * 8);
     }
 
+    // One map cell's colors for a tile in the loaded pack (see
+    // TileColorPack::SetCellTile): rgb = 64 x RGB, mask = pixels colored,
+    // keep = pixels left uncolored on purpose.
+    void vbp_pack_set_cell(int cell, int palette, uint32_t hash, uint64_t mask, uint64_t keep, const uint8_t *rgb)
+    {
+        TileColorPack::CellTile c;
+        c.cell = static_cast<uint16_t>(cell);
+        c.palette = static_cast<uint8_t>(palette & 3);
+        c.hash = hash;
+        c.mask = mask;
+        c.keep = keep;
+        std::memcpy(c.rgb, rgb, sizeof(c.rgb));
+        g_pack.SetCellTile(c);
+        SetPackForRendering();
+    }
     void vbp_import_begin() { g_import.Clear(); g_importStats = {}; }
     int vbp_import_add(const uint8_t *rgb, int w, int h, const uint8_t *sidecar, size_t n)
     {

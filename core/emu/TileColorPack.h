@@ -193,6 +193,9 @@ public:
     const std::unordered_map<uint32_t, Tile> &Tiles() const { return m_tiles; }
     // Sorted by cell, then palette, then hash.
     const std::vector<CellTile> &CellTiles() const { return m_cellTiles; }
+    // Adds one map cell's colors for a tile, or replaces the ones it has -
+    // for mending a pack without its paintings (tools/harness).
+    void SetCellTile(const CellTile &cell);
 
     // True if that tile pixel has a color.
     bool Has(uint32_t hash, unsigned index) const

@@ -1398,6 +1398,18 @@ void TileColorPack::FinishImport(ImportStats &stats)
     m_cellVotes.shrink_to_fit();
 }
 
+void TileColorPack::SetCellTile(const CellTile &cell)
+{
+    // (kept sorted by cell, palette, hash - as Deserialize leaves it)
+    const auto before = [](const CellTile &a, const CellTile &b)
+    { return a.cell != b.cell ? a.cell < b.cell : a.palette != b.palette ? a.palette < b.palette : a.hash < b.hash; };
+    const auto it = std::lower_bound(m_cellTiles.begin(), m_cellTiles.end(), cell, before);
+    if (it != m_cellTiles.end() && !before(cell, *it))
+        *it = cell;
+    else
+        m_cellTiles.insert(it, cell);
+}
+
 std::vector<uint8_t> TileColorPack::Serialize() const
 {
     // "VBGOCP03", tile count, then per tile: hash, mask, 64 x RGB; then the
