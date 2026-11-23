@@ -10,7 +10,7 @@ decompresses and lays it out three ways:
    the order the game loads it into character memory.
 2. "paint sheets/": the same graphics cut into 3x paint sheets with a .tiles
    file each, so a painted copy imports into a color pack (see "Color packs"
-   in README.md). They import like F6 tile sheets: they fill in whatever the
+   in docs/USER_GUIDE.md). They import like F6 tile sheets: they fill in whatever the
    screen paintings don't color. Tiles that only exist outside the assembled
    sprites and screens are collected on "loose tiles" sheets, so every tile in
    the ROM can be painted somewhere.

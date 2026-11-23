@@ -93,7 +93,7 @@ jobs:
           cp build-pc/Release/*.dll "$dir/" 2>/dev/null || true
           cp -r build-pc/Release/colorpacks "$dir/"
           cp assets/PlaceRomsHere.txt "$dir/roms/"
-          cp -r README.md LICENSE THIRD-PARTY-NOTICES.md licenses "$dir/"
+          cp -r README.md AGENTS.md docs LICENSE THIRD-PARTY-NOTICES.md licenses "$dir/"
           7z a -tzip "$dir.zip" "$dir" > /dev/null
           echo "PACKAGE=$dir" >> "$GITHUB_ENV"
 
@@ -155,7 +155,7 @@ jobs:
           cp assets/PlaceRomsHere.txt "$dir/roms/"
           cp -r assets/steam "$dir/steam" # (library artwork for adding it to Steam)
           cp platform/desktop/install-to-steam.py "$dir/"
-          cp -r README.md LICENSE THIRD-PARTY-NOTICES.md licenses "$dir/"
+          cp -r README.md AGENTS.md docs LICENSE THIRD-PARTY-NOTICES.md licenses "$dir/"
           tar czf "$dir.tar.gz" "$dir"
           echo "PACKAGE=$dir" >> "$GITHUB_ENV"
 

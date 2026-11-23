@@ -15,5 +15,5 @@ cp -r build-frame/fonts build-frame/icons build-frame/logo build-frame/colorpack
 cp assets/PlaceRomsHere.txt "$out/roms/"
 cp -r assets/steam "$out/steam"
 cp platform/desktop/install-to-steam.py "$out/"
-cp -r README.md LICENSE THIRD-PARTY-NOTICES.md licenses "$out/"
+cp -r README.md AGENTS.md docs LICENSE THIRD-PARTY-NOTICES.md licenses "$out/"
 echo "Packaged $out"
