@@ -178,9 +178,16 @@ void Updater::Choose(const std::string &json)
                 // (the app's own package: "VBoyColor-..." - not the RetroArch
                 // core's "vboycolor_libretro-...-windows-x64.zip" beside it)
                 const bool app = name.compare(0, 10, "VBoyColor-") == 0;
+                // (Linux: this machine's own build - "-linux-x64" and
+                // "-linux-arm64" sit side by side, and the other one won't run)
+#if defined(__aarch64__)
+                constexpr const char *kLinuxArch = "-linux-arm64";
+#else
+                constexpr const char *kLinuxArch = "-linux-x64";
+#endif
                 const bool fits = !app                   ? false
                                   : package == "windows" ? name.find("-windows-") != std::string::npos && endsWith(".zip")
-                                  : package == "linux"   ? name.find("-linux-") != std::string::npos && endsWith(".tar.gz")
+                                  : package == "linux"   ? name.find(kLinuxArch) != std::string::npos && endsWith(".tar.gz")
                                   : package == "android" ? endsWith(".apk")
                                                          : false;
                 if (fits && asset.empty())
