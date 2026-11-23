@@ -311,7 +311,7 @@ Switch). A Switch running Android or Linux uses the `android-arm64` or
 
 ## Controls
 
-**Menu:** the left controller's Menu button (the right one's on the Frame),
+**Menu:** the left controller's Menu button (on the Frame: hold the right one's Menu button for half a second - a tap is Start),
 a gamepad's Select + Start held together (or Guide), or **Tab** or **Esc** on PC. Some PC VR runtimes
 keep the Menu button for themselves - there, hold the left stick click for a
 second. In the menu: sticks / D-pad / arrow keys move, A (Enter) picks, B
@@ -325,7 +325,7 @@ trigger and moving drags (scrolls lists and the library).
 | Right D-pad | right stick | right stick | W A S D | right stick |
 | A / B | A / B | A / B | X / Z | B / A - where the Virtual Boy has them (right and bottom face buttons) |
 | L / R | left / right trigger | left / right trigger or bumper | Q / E | LB / RB (or LT / RT) |
-| Start / Select | Y / X | Y / X (or View for Select) | Enter / Backspace | Start / Back (View) |
+| Start / Select | Y / X | Menu (tap) or Y / View or X | Enter / Backspace | Start / Back (View) |
 
 The gamepad column is the PC window's and the phone's. With a gamepad in VR
 (VBoyColorVR.exe, or a pad paired with the Quest), A is on A and B on B.

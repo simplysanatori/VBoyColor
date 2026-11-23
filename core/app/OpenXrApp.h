@@ -10,6 +10,7 @@
 
 #include <openxr/openxr.h>
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -154,6 +155,12 @@ private:
     // SteamVR: the screen goes out as a projection layer, not as per-eye
     // quads - see RenderScreenProjection.
     bool m_screenAsProjection = false;
+    // The Steam Frame's Menu button (see RenderFrame): held since, whether
+    // holding it opened the menu, and refreshes left of its Start tap.
+    bool m_frameMenuDown = false;
+    bool m_frameMenuOpened = false;
+    int m_frameStartFrames = 0;
+    std::chrono::steady_clock::time_point m_frameMenuSince{};
     bool m_passthroughFailed = false; // creating it failed - stays black
     bool m_passthroughRunning = false;
     XrPassthroughFB m_passthrough = XR_NULL_HANDLE;

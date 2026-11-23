@@ -36,6 +36,11 @@ public:
     // single toggle-per-press do their own last-frame comparison, same as
     // buttonStates/lastButtonStates elsewhere.
     bool IsMenuButtonPressed() const { return m_menuButtonPressed; }
+    // The Steam Frame's controllers are in use: their Menu button is the
+    // game's Start on a tap and opens the app's menu when held - see
+    // OpenXrApp::RenderFrame. IsMenuButtonPressed leaves it out then.
+    bool FrameControllersActive() const { return m_frameProfileActive; }
+    bool IsFrameMenuPressed() const { return m_frameMenuPressed; }
 
     // Raw right-hand thumbstick/A/B state, for gameplay input mapping
     // (OpenXrApp maps this to VB buttons - see Emulator.h's VBButtonBit) -
@@ -85,6 +90,9 @@ private:
     // queries need) and simply copied out by GetButtonStates().
     uint32_t m_buttonStates[3]{};
     bool m_menuButtonPressed{false};
+    XrPath m_frameProfilePath{XR_NULL_PATH};
+    bool m_frameProfileActive{false};
+    bool m_frameMenuPressed{false};
     int m_stickClickFrames{0}; // (PC VR: frames the left stick click has been held)
     XrVector2f m_rightThumbstick{0.0f, 0.0f};
     bool m_aPressed{false};

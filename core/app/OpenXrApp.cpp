@@ -1078,6 +1078,37 @@ void OpenXrApp::RenderFrame()
     if (menuButtonPressed && !m_lastMenuButtonPressed)
         m_appMenu.ToggleOpen();
     m_lastMenuButtonPressed = menuButtonPressed;
+    // The Steam Frame's Menu button, where a gamepad has Start: a tap is the
+    // game's Start (the gamepad's Start - Button mapping's Start default),
+    // holding it half a second opens the app's menu; with the menu open, a
+    // tap closes it.
+    {
+        const bool down = m_input.IsFrameMenuPressed();
+        const auto now = std::chrono::steady_clock::now();
+        if (down && !m_frameMenuDown)
+        {
+            m_frameMenuSince = now;
+            m_frameMenuOpened = false;
+        }
+        if (down && !m_frameMenuOpened && !m_appMenu.IsOpen() && now - m_frameMenuSince >= std::chrono::milliseconds(500))
+        {
+            m_appMenu.Show();
+            m_frameMenuOpened = true;
+        }
+        if (!down && m_frameMenuDown && !m_frameMenuOpened)
+        {
+            if (m_appMenu.IsOpen())
+                m_appMenu.ToggleOpen();
+            else
+                m_frameStartFrames = 6; // (a few refreshes: at least one game frame)
+        }
+        m_frameMenuDown = down;
+        if (m_frameStartFrames > 0 && !m_appMenu.IsOpen())
+        {
+            m_buttonStates[ButtonMapper::DeviceGamepad] |= ButtonMapper::ButtonMapping[ButtonMapper::EmuButton_Enter];
+            --m_frameStartFrames;
+        }
+    }
     // The menu's own button (Button mapping > Menu) opens it from a game.
     {
         uint32_t states[3] = {m_buttonStates[0], m_buttonStates[1], m_buttonStates[2]};

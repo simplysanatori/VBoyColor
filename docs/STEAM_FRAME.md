@@ -42,7 +42,8 @@ The detailed source paths are in [How It Works](#how-it-works) below.
 
 The Frame's controllers are a gamepad split in two: the D-pad and View on
 the left, A, B, X, Y and Menu on the right. The buttons do what the same
-buttons do on a Quest, and the extra ones work like a gamepad's.
+buttons do on a Quest, and the extra ones work like a gamepad's: View is Select and
+Menu is Start, as on a gamepad, with the app's menu on a held Menu.
 
 | Virtual Boy | Steam Frame |
 |---|---|
@@ -50,9 +51,9 @@ buttons do on a Quest, and the extra ones work like a gamepad's.
 | Right D-pad | right stick |
 | A / B | A / B |
 | L / R | left / right trigger, or the bumpers |
-| Start | Y |
-| Select | X, or View |
-| VBoy Color's menu | Menu (or hold the left stick click for a second) |
+| Start | Menu (a tap), or Y |
+| Select | View, or X |
+| VBoy Color's menu | hold Menu for half a second (or hold the left stick click for a second); a tap of Menu closes it |
 
 Everything can be remapped in Settings > Button mapping, as anywhere else.
 The D-pad, the bumpers and View show up there as the gamepad's buttons.

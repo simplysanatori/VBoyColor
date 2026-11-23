@@ -147,6 +147,7 @@ void XrInput::Initialize(XrInstance instance, XrSession session, bool frameContr
         XrPath frameProfilePath;
         CheckXr(xrStringToPath(instance, "/interaction_profiles/valve/frame_controller_valve", &frameProfilePath),
                 "xrStringToPath (Frame profile)");
+        m_frameProfilePath = frameProfilePath;
         XrInteractionProfileSuggestedBinding frameSuggested{XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING};
         frameSuggested.interactionProfile = frameProfilePath;
         frameSuggested.suggestedBindings = frameBindings;
@@ -366,6 +367,18 @@ void XrInput::Sync(XrSession session)
     // all. Not on the Quest (its Menu button always reaches the app), and
     // never a quick press there either.
     m_menuButtonPressed = readRawBool(m_menuClickAction);
+    // (the Frame's controllers: Menu goes to OpenXrApp as its own button -
+    // Start on a tap, the app's menu when held)
+    m_frameProfileActive = false;
+    if (m_frameProfilePath != XR_NULL_PATH)
+    {
+        XrInteractionProfileState profile{XR_TYPE_INTERACTION_PROFILE_STATE};
+        m_frameProfileActive = XR_SUCCEEDED(xrGetCurrentInteractionProfile(session, m_rightHandPath, &profile)) &&
+                               profile.interactionProfile == m_frameProfilePath;
+    }
+    m_frameMenuPressed = m_frameProfileActive && m_menuButtonPressed;
+    if (m_frameProfileActive)
+        m_menuButtonPressed = false;
 #if !defined(__ANDROID__)
     constexpr int kStickHoldFrames = 72; // ~1 s at 72-90 Hz
     m_stickClickFrames = readRawBool(m_thumbstickClickAction) ? m_stickClickFrames + 1 : 0;
