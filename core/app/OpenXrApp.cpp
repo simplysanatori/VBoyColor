@@ -319,6 +319,12 @@ void OpenXrApp::CreateInstance(const InitInfo &info)
     XrLogLine("[OpenXR] Runtime: %s", m_runtimeName.c_str());
     // See RenderScreenProjection.
     m_screenAsProjection = m_runtimeName.find("SteamVR") != std::string::npos;
+    // VBC_SCREEN_AS_PROJECTION=0/1 overrides it, for comparing the two in
+    // the headset (Azahar for Frame shows per-eye quads to the right eyes on
+    // the Frame's SteamVR, so the quads may be fine there now).
+    if (const char *forced = std::getenv("VBC_SCREEN_AS_PROJECTION"); forced && *forced)
+        m_screenAsProjection = forced[0] == '1';
+    XrLogLine("[OpenXR] Screen as %s", m_screenAsProjection ? "a projection layer" : "per-eye quads");
 }
 
 void OpenXrApp::InitializeSystem()
@@ -977,11 +983,42 @@ void OpenXrApp::UpdateBatteryPercent(float deltaSeconds)
     m_appMenu.SetBatteryPercent(m_platform->GetBatteryPercent());
 }
 
+// VBC_FRAME_TIMING=1: every 5 s, one log line with the refreshes' time in
+// xrWaitFrame and the app's own work (input, emulation, drawing, up to
+// xrEndFrame) - average and worst - for before/after comparisons.
+void OpenXrApp::LogFrameTiming(float waitMs, float workMs, XrDuration period)
+{
+    static const bool enabled = []
+    {
+        const char *v = std::getenv("VBC_FRAME_TIMING");
+        return v && v[0] == '1';
+    }();
+    if (!enabled)
+        return;
+    static int frames = 0;
+    static float waitSum = 0.0f, workSum = 0.0f, workMax = 0.0f;
+    static auto since = std::chrono::steady_clock::now();
+    ++frames;
+    waitSum += waitMs;
+    workSum += workMs;
+    workMax = std::max(workMax, workMs);
+    const auto now = std::chrono::steady_clock::now();
+    if (now - since < std::chrono::seconds(5))
+        return;
+    XrLogLine("[Timing] %d refreshes at %.1f Hz: work %.2f ms avg, %.2f ms worst; xrWaitFrame %.2f ms avg", frames,
+              period > 0 ? 1e9 / static_cast<double>(period) : 0.0, workSum / frames, workMax, waitSum / frames);
+    frames = 0;
+    waitSum = workSum = workMax = 0.0f;
+    since = now;
+}
+
 void OpenXrApp::RenderFrame()
 {
     XrFrameWaitInfo frameWaitInfo{XR_TYPE_FRAME_WAIT_INFO};
     XrFrameState frameState{XR_TYPE_FRAME_STATE};
+    const auto waitStart = std::chrono::steady_clock::now();
     CheckXr(xrWaitFrame(m_session, &frameWaitInfo, &frameState), "xrWaitFrame");
+    const auto workStart = std::chrono::steady_clock::now();
 
     XrFrameBeginInfo frameBeginInfo{XR_TYPE_FRAME_BEGIN_INFO};
     CheckXr(xrBeginFrame(m_session, &frameBeginInfo), "xrBeginFrame");
@@ -1199,6 +1236,9 @@ void OpenXrApp::RenderFrame()
     frameEndInfo.layerCount = static_cast<uint32_t>(layers.size());
     frameEndInfo.layers = layers.data();
     CheckXr(xrEndFrame(m_session, &frameEndInfo), "xrEndFrame");
+    LogFrameTiming(std::chrono::duration<float, std::milli>(workStart - waitStart).count(),
+                   std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - workStart).count(),
+                   frameState.predictedDisplayPeriod);
 }
 
 bool OpenXrApp::UpdatePassthrough()

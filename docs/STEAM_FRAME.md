@@ -86,6 +86,19 @@ Touch's bindings are still suggested for every other runtime and controller.
 The Linux builds now include `VBoyColorVR` (it already built there, it just
 wasn't packaged), and CI builds Linux on ARM64 too.
 
+### Testing switches
+
+Two environment variables help with comparisons in the headset. In Steam, set
+them in the entry's launch options, for example
+`VBC_FRAME_TIMING=1 %command%`.
+
+- `VBC_SCREEN_AS_PROJECTION=0` sends the screen as the two per-eye quads,
+  and `=1` as the projection layer. The default is the projection layer on
+  SteamVR. The log's `[OpenXR] Screen as ...` line shows which one is used.
+- `VBC_FRAME_TIMING=1` logs a `[Timing]` line every 5 seconds: the refresh
+  rate, the app's work per refresh (average and worst) and the time spent in
+  `xrWaitFrame`.
+
 ## Building It Yourself
 
 ### Docker (Frame Package)

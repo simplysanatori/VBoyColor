@@ -106,6 +106,8 @@ private:
     // little closer to the viewer than the screen layer so it visibly
     // floats in front of it instead of sitting flush on the same plane.
     bool RenderMenuLayer(XrCompositionLayerQuad &quadLayer);
+    // VBC_FRAME_TIMING=1's log line - see the definition.
+    static void LogFrameTiming(float waitMs, float workMs, XrDuration period);
     // The screen's two quads (from RenderScreenLayer) as the views of one
     // projection layer, for runtimes that show per-eye quads to both eyes
     // (m_screenAsProjection) - see the definition's doc comment.
