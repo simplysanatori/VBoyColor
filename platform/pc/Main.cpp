@@ -12,10 +12,37 @@
 
 #include <chrono>
 #include <cstdio>
+#include <cstring>
+#include <filesystem>
 #include <thread>
 
-int main()
+int main(int argc, char **argv)
 {
+    // --rom <file> (or just the file): start that game instead of the
+    // library - for a Steam entry that opens one game.
+    std::string startRom;
+    for (int i = 1; i < argc; ++i)
+    {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0)
+        {
+            std::printf("Usage: VBoyColorVR [--rom <file.vb>]\n"
+                        "  --rom <file>  start this game instead of the library\n");
+            return 0;
+        }
+        const char *rom = std::strcmp(argv[i], "--rom") == 0 ? (i + 1 < argc ? argv[++i] : nullptr)
+                          : argv[i][0] != '-'                ? argv[i]
+                                                             : nullptr;
+        if (rom)
+        {
+            // (before the working directory moves to the exe's folder - see
+            // DesktopPlatform's constructor)
+            std::error_code ec;
+            startRom = std::filesystem::absolute(rom, ec).string();
+        }
+        else
+            std::fprintf(stderr, "VBoy Color VR: ignoring %s (see --help)\n", argv[i]);
+    }
+
     // Unbuffered stdout/stderr so logs show up immediately even when
     // redirected to a file (buffered-until-exit output made earlier
     // debugging in this session confusing).
@@ -62,6 +89,8 @@ int main()
         info.platform = &platform;
         app.Initialize(info);
         std::printf("VBoy Color VR initialized OK\n");
+        if (!startRom.empty())
+            app.PlayRom(startRom);
     }
     catch (const std::exception &ex)
     {

@@ -436,13 +436,41 @@ namespace
 
 int main(int argc, char **argv)
 {
-    // A ROM named on the command line (before the working directory moves
-    // to the exe's folder - see DesktopPlatform's constructor).
+    // The command line: --rom <file> (or just the file - a ROM or a .bk2
+    // movie) and --fullscreen (--windowed: the default, for scripts). Read before the working
+    // directory moves to the exe's folder - see DesktopPlatform's constructor.
     std::string startRom;
-    if (argc > 1)
+    bool startFullscreen = false;
+    for (int i = 1; i < argc; ++i)
     {
-        std::error_code ec;
-        startRom = std::filesystem::absolute(argv[1], ec).string();
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0)
+        {
+            std::printf("Usage: VBoyColor [--rom <file.vb|.bk2>] [--fullscreen | --windowed]\n"
+                        "  --rom <file>   start this game (or play this movie) instead of the library\n"
+                        "  --fullscreen   start in fullscreen (Alt+Enter switches back)\n"
+                        "  --windowed     start in a window (the default)\n");
+            return 0;
+        }
+        if (std::strcmp(argv[i], "--fullscreen") == 0)
+        {
+            startFullscreen = true;
+            continue;
+        }
+        if (std::strcmp(argv[i], "--windowed") == 0)
+        {
+            startFullscreen = false;
+            continue;
+        }
+        const char *rom = std::strcmp(argv[i], "--rom") == 0 ? (i + 1 < argc ? argv[++i] : nullptr)
+                          : argv[i][0] != '-'                ? argv[i]
+                                                             : nullptr;
+        if (rom)
+        {
+            std::error_code ec;
+            startRom = std::filesystem::absolute(rom, ec).string();
+        }
+        else
+            std::fprintf(stderr, "VBoy Color: ignoring %s (see --help)\n", argv[i]);
     }
     DesktopPlatform platform;
 
@@ -625,6 +653,9 @@ int main(int argc, char **argv)
             else
                 LoadRomFromPath(emulator, appMenu, settings, platform, start);
         }
+
+        if (startFullscreen)
+            ToggleFullscreen(window);
 
         uint32_t buttonStates[3]{};
         uint32_t lastButtonStates[3]{};

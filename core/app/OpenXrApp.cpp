@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdarg>
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 
@@ -255,6 +256,19 @@ void OpenXrApp::Initialize(const InitInfo &info)
                          ButtonMappingProfile::Vr, m_passthroughExtAvailable);
 
     m_input.Initialize(m_instance, m_session, m_frameControllerExtAvailable);
+}
+
+bool OpenXrApp::PlayRom(const std::string &path)
+{
+    const std::filesystem::path file(path);
+    if (!m_emulator.LoadRom(file.string(), file.stem().string()))
+    {
+        XrLogLine("VBoy Color VR: couldn't load %s", path.c_str());
+        return false;
+    }
+    m_settings.ApplyGameColors(*m_platform, m_emulator.RomName(), m_emulator.RomCrc()); // this game's colors
+    m_appMenu.Hide();
+    return true;
 }
 
 void OpenXrApp::CreateInstance(const InitInfo &info)

@@ -34,6 +34,9 @@ public:
     };
 
     void Initialize(const InitInfo &info);
+    // Starts a game straight away, as the library's Play does (the command
+    // line's --rom). False if it couldn't be loaded.
+    bool PlayRom(const std::string &path);
     void Shutdown();
 
     // Pumps the XR event queue and updates internal session-state tracking.

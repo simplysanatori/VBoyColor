@@ -261,6 +261,18 @@ Download `VBoyColor-<version>-linux-x64.tar.gz`, unpack it, put your ROMs in
 `./VBoyColorVR` is the VR version, for a PC headset on SteamVR. For an ARM64
 machine, download `VBoyColor-<version>-linux-arm64.tar.gz` instead.
 
+### Starting a game from the command line
+
+Both apps take a game to start, for a shortcut or a Steam entry:
+
+```
+VBoyColor --rom "roms/Virtual Boy Wario Land (Japan, USA).vb" --fullscreen
+VBoyColorVR --rom "roms/Mario Clash (Japan, USA).vb"
+```
+
+`--fullscreen` starts the window app in fullscreen (Alt+Enter switches back).
+`--help` lists the options.
+
 ### RetroArch
 
 VBoy Color is also a RetroArch core (or for any other libretro frontend):
