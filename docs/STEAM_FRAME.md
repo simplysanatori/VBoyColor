@@ -99,6 +99,10 @@ them in the entry's launch options, for example
   rate, the app's work per refresh (average and worst) and the time spent in
   `xrWaitFrame`.
 
+The black eye buffers under the screen and menu are one tiny static image,
+cleared once. They used to be two full-size images, cleared and waited on
+every refresh.
+
 ## Building It Yourself
 
 ### Docker (Frame Package)

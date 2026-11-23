@@ -367,15 +367,19 @@ void OpenXrApp::CreateSwapchains()
             "xrEnumerateSwapchainFormats");
     m_colorFormat = m_renderer.SelectSwapchainFormat(formats);
 
-    m_swapchains.resize(m_configViews.size());
-    for (size_t i = 0; i < m_configViews.size(); ++i)
+    // The eye buffers under the screen and menu layers are only ever black,
+    // so they're one tiny static image, cleared once here and handed to
+    // both views every frame (stretched over each eye's field of view) -
+    // not two full-size swapchains (about 2k x 2k each on a Frame or Quest
+    // 3) cleared and waited on every refresh for the same black.
+    m_swapchains.resize(1);
     {
-        const XrViewConfigurationView &vp = m_configViews[i];
-        Swapchain &sc = m_swapchains[i];
-        sc.width = vp.recommendedImageRectWidth;
-        sc.height = vp.recommendedImageRectHeight;
+        Swapchain &sc = m_swapchains[0];
+        sc.width = 16;
+        sc.height = 16;
 
         XrSwapchainCreateInfo swapchainInfo{XR_TYPE_SWAPCHAIN_CREATE_INFO};
+        swapchainInfo.createFlags = XR_SWAPCHAIN_CREATE_STATIC_IMAGE_BIT;
         swapchainInfo.arraySize = 1;
         swapchainInfo.format = m_colorFormat;
         swapchainInfo.width = sc.width;
@@ -384,7 +388,15 @@ void OpenXrApp::CreateSwapchains()
         swapchainInfo.faceCount = 1;
         swapchainInfo.sampleCount = 1;
         swapchainInfo.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
-        CheckXr(xrCreateSwapchain(m_session, &swapchainInfo, &sc.handle), "xrCreateSwapchain (projection)");
+        // (a runtime without static images gets an ordinary swapchain, used
+        // the same way: one image released once, which a layer may keep
+        // showing - the runtime uses a swapchain's last released image)
+        if (XR_FAILED(xrCreateSwapchain(m_session, &swapchainInfo, &sc.handle)))
+        {
+            XrLogLine("[OpenXR] No static swapchain image - an ordinary one for the black eye buffers");
+            swapchainInfo.createFlags = 0;
+            CheckXr(xrCreateSwapchain(m_session, &swapchainInfo, &sc.handle), "xrCreateSwapchain (projection)");
+        }
 
         uint32_t imageCount = 0;
         CheckXr(xrEnumerateSwapchainImages(sc.handle, 0, &imageCount, nullptr),
@@ -393,6 +405,18 @@ void OpenXrApp::CreateSwapchains()
         CheckXr(xrEnumerateSwapchainImages(sc.handle, imageCount, &imageCount,
                                            reinterpret_cast<XrSwapchainImageBaseHeader *>(sc.images.data())),
                 "xrEnumerateSwapchainImages (projection)");
+
+        // (acquired, drawn and released once, ever)
+        XrSwapchainImageAcquireInfo acquireInfo{XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO};
+        uint32_t imageIndex = 0;
+        CheckXr(xrAcquireSwapchainImage(sc.handle, &acquireInfo, &imageIndex), "xrAcquireSwapchainImage (projection)");
+        XrSwapchainImageWaitInfo waitInfo{XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO};
+        waitInfo.timeout = XR_INFINITE_DURATION;
+        CheckXr(xrWaitSwapchainImage(sc.handle, &waitInfo), "xrWaitSwapchainImage (projection)");
+        m_renderer.RenderEye(sc.images[imageIndex].image, m_colorFormat, static_cast<uint32_t>(sc.width),
+                             static_cast<uint32_t>(sc.height));
+        XrSwapchainImageReleaseInfo releaseInfo{XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO};
+        CheckXr(xrReleaseSwapchainImage(sc.handle, &releaseInfo), "xrReleaseSwapchainImage (projection)");
     }
 
     // Dedicated per-eye swapchains for the emulator screen's quad
@@ -1157,32 +1181,17 @@ void OpenXrApp::RenderFrame()
             projectionViews.resize(viewCountOutput);
 
             // Main eye buffers stay plain black - all real content lives in
-            // the quad layers below (menu/emulator screen).
+            // the quad layers below (menu/emulator screen). The same static
+            // black image for every view (see CreateSwapchains).
+            const Swapchain &sc = m_swapchains[0];
             for (uint32_t i = 0; i < viewCountOutput; ++i)
             {
-                Swapchain &sc = m_swapchains[i];
-
-                XrSwapchainImageAcquireInfo acquireInfo{XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO};
-                uint32_t imageIndex = 0;
-                CheckXr(xrAcquireSwapchainImage(sc.handle, &acquireInfo, &imageIndex),
-                        "xrAcquireSwapchainImage (projection)");
-
-                XrSwapchainImageWaitInfo waitInfo{XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO};
-                waitInfo.timeout = XR_INFINITE_DURATION;
-                CheckXr(xrWaitSwapchainImage(sc.handle, &waitInfo), "xrWaitSwapchainImage (projection)");
-
                 projectionViews[i] = XrCompositionLayerProjectionView{XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW};
                 projectionViews[i].pose = m_views[i].pose;
                 projectionViews[i].fov = m_views[i].fov;
                 projectionViews[i].subImage.swapchain = sc.handle;
                 projectionViews[i].subImage.imageRect.offset = {0, 0};
                 projectionViews[i].subImage.imageRect.extent = {sc.width, sc.height};
-
-                m_renderer.RenderEye(sc.images[imageIndex].image, m_colorFormat, static_cast<uint32_t>(sc.width),
-                                     static_cast<uint32_t>(sc.height));
-
-                XrSwapchainImageReleaseInfo releaseInfo{XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO};
-                CheckXr(xrReleaseSwapchainImage(sc.handle, &releaseInfo), "xrReleaseSwapchainImage (projection)");
             }
 
             projectionLayer.space = m_appSpace;
